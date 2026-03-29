@@ -4,6 +4,10 @@ Matteflow is a browser demo for editorial video layout: load a local video, isol
 
 It is a small standalone prototype built on top of [`@chenglou/pretext`](https://github.com/chenglou/pretext) for manual line layout, plus a lightweight matte pass for silhouette extraction. The result is not traditional rectangular text wrap. The text bends around a subject-shaped exclusion zone derived from the video frame itself.
 
+[![Matteflow demo preview](./resource/demo-preview.gif)](./resource/demo.mp4)
+
+Click the preview above to open the full demo video.
+
 ## Inspiration
 
 Matteflow is a recreation experiment inspired by this post:
@@ -63,11 +67,12 @@ npm test
 
 ## Sample Asset
 
+- Inline README preview: [`resource/demo-preview.gif`](./resource/demo-preview.gif)
 - Included demo video: [`resource/demo.mp4`](./resource/demo.mp4)
 - Included sample clip: [`resource/dance.mp4`](./resource/dance.mp4)
 - Source video for `dance.mp4`: [YouTube](https://www.youtube.com/watch?v=M9IcZFo6CBM)
 
-The bundled `demo.mp4` is a ready-to-use showcase clip for quick local playback checks. The bundled `dance.mp4` is the sample clip used for local testing and README walkthroughs.
+The bundled `demo-preview.gif` is the inline preview shown in the README. The bundled `demo.mp4` is the full showcase video for quick local playback checks. The bundled `dance.mp4` is the sample clip used for local testing and README walkthroughs.
 
 ## Controls
 
@@ -99,6 +104,7 @@ The text is positioned line by line rather than relying on DOM text-wrap. `prete
 .
 ├── index.html
 ├── resource/
+│   ├── demo-preview.gif
 │   ├── demo.mp4
 │   └── dance.mp4
 ├── src/
@@ -135,4 +141,4 @@ The text is positioned line by line rather than relying on DOM text-wrap. `prete
 
 The code in this repository is licensed under the [MIT License](./LICENSE).
 
-The sample files [`resource/demo.mp4`](./resource/demo.mp4) and [`resource/dance.mp4`](./resource/dance.mp4) are provided as demo asset references and are not covered by the MIT license for the codebase.
+The sample assets [`resource/demo-preview.gif`](./resource/demo-preview.gif), [`resource/demo.mp4`](./resource/demo.mp4), and [`resource/dance.mp4`](./resource/dance.mp4) are provided as demo asset references and are not covered by the MIT license for the codebase.

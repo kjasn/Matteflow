@@ -1,6 +1,10 @@
 function average(samples) {
-  const total = samples.reduce((sum, value) => sum + value, 0);
-  return Math.round(total / samples.length);
+  const sorted = [...samples].sort((left, right) => left - right);
+  const trim = Math.floor(sorted.length * 0.15);
+  const end = sorted.length - trim;
+  const stable = sorted.slice(trim, Math.max(trim + 1, end));
+  const total = stable.reduce((sum, value) => sum + value, 0);
+  return Math.round(total / stable.length);
 }
 
 function pixelOffset(width, x, y) {
@@ -51,6 +55,61 @@ function colorDistance(pixelR, pixelG, pixelB, background) {
   );
 }
 
+function sampleUniqueEdgePixels(width, height, onSample) {
+  const seen = new Set();
+
+  const sample = (x, y) => {
+    const key = `${x}:${y}`;
+    if (seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    onSample(x, y);
+  };
+
+  for (let x = 0; x < width; x += 1) {
+    sample(x, 0);
+    sample(x, height - 1);
+  }
+
+  for (let y = 0; y < height; y += 1) {
+    sample(0, y);
+    sample(width - 1, y);
+  }
+}
+
+function percentile(values, quantile) {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  const sorted = [...values].sort((left, right) => left - right);
+  const index = Math.min(
+    sorted.length - 1,
+    Math.max(0, Math.round((sorted.length - 1) * quantile)),
+  );
+  return sorted[index];
+}
+
+function estimateEdgeNoiseFloor(pixels, width, height, background, quantile) {
+  const distances = [];
+
+  sampleUniqueEdgePixels(width, height, (x, y) => {
+    const offset = pixelOffset(width, x, y);
+    distances.push(
+      colorDistance(
+        pixels[offset],
+        pixels[offset + 1],
+        pixels[offset + 2],
+        background,
+      ),
+    );
+  });
+
+  return percentile(distances, quantile);
+}
+
 export function createForegroundAlphaMask(
   pixels,
   width,
@@ -59,9 +118,27 @@ export function createForegroundAlphaMask(
     background = estimateBackgroundColor(pixels, width, height),
     threshold = 42,
     feather = 26,
+    adaptiveThreshold = true,
+    edgeNoiseQuantile = 0.9,
+    edgeNoiseMargin = 8,
+    maxThresholdBoost = 72,
   } = {},
 ) {
   const alpha = new Uint8ClampedArray(width * height);
+  let effectiveThreshold = threshold;
+
+  if (adaptiveThreshold) {
+    const edgeNoiseFloor = estimateEdgeNoiseFloor(
+      pixels,
+      width,
+      height,
+      background,
+      edgeNoiseQuantile,
+    );
+    const adaptiveFloor = edgeNoiseFloor + edgeNoiseMargin;
+    const maxAllowedThreshold = threshold + Math.max(0, maxThresholdBoost);
+    effectiveThreshold = Math.min(maxAllowedThreshold, Math.max(threshold, adaptiveFloor));
+  }
 
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
@@ -72,7 +149,7 @@ export function createForegroundAlphaMask(
         pixels[offset + 2],
         background,
       );
-      const normalized = (distance - threshold) / Math.max(1, feather);
+      const normalized = (distance - effectiveThreshold) / Math.max(1, feather);
       const opacity = Math.round(Math.max(0, Math.min(1, normalized)) * 255);
       alpha[y * width + x] = opacity;
     }

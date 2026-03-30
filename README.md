@@ -92,7 +92,7 @@ The bundled `demo-preview.gif` is the inline preview shown in the README. The bu
 Matteflow is built from a few small modules:
 
 - [`src/matte.js`](./src/matte.js): estimates background color, creates a foreground alpha mask, derives subject bounds, and extracts a wrap profile from the frame
-- [`src/layout.js`](./src/layout.js): computes wrap regions, loads `@chenglou/pretext` in the browser, and places lines into left/right text flows around the silhouette
+- [`src/layout.js`](./src/layout.js): computes wrap regions, loads `@chenglou/pretext` in the browser, and places lines into a single flowing text stream around the silhouette
 - [`src/profile.js`](./src/profile.js): provides profile sampling and fallback shape behavior
 - [`src/demo.js`](./src/demo.js): wires the UI, render loop, matte processing, and page composition together
 

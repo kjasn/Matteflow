@@ -4,7 +4,6 @@ import { DEFAULT_PROFILE } from '../src/profile.js';
 import {
   computeWrapRegions,
   createCanvasPreparedText,
-  createDualFlowPlan,
   createFlowPlan,
   splitWordForLine,
 } from '../src/layout.js';
@@ -216,31 +215,17 @@ test('supports cursor-based line sources for browser layout', () => {
   );
 });
 
-test('creates balanced left and right column plans', () => {
-  const plan = createDualFlowPlan({
-    leftPrepared: {
+test('single-flow plan emits lines from one prepared source', () => {
+  const plan = createFlowPlan({
+    prepared: {
       startCursor: 0,
       nextLine(startCursor, regionWidth) {
-        if (startCursor >= 2) {
+        if (startCursor >= 4) {
           return null;
         }
 
         return {
-          text: `left-${startCursor}`,
-          width: Math.min(regionWidth - 10, 180),
-          end: startCursor + 1,
-        };
-      },
-    },
-    rightPrepared: {
-      startCursor: 0,
-      nextLine(startCursor, regionWidth) {
-        if (startCursor >= 2) {
-          return null;
-        }
-
-        return {
-          text: `right-${startCursor}`,
+          text: `line-${startCursor}`,
           width: Math.min(regionWidth - 10, 180),
           end: startCursor + 1,
         };
@@ -251,59 +236,6 @@ test('creates balanced left and right column plans', () => {
     articleWidth: 900,
     articleHeight: 220,
     lineHeight: 28,
-    columnGap: 44,
-    stageTop: 170,
-    stageHeight: 120,
-    stageCenterX: 490,
-    stageWidth: 280,
-    profile: DEFAULT_PROFILE,
-    wrapStrength: 1,
-    gutter: 24,
-  });
-
-  assert.deepEqual(
-    plan.lines.map(line => line.column),
-    ['left', 'right', 'left', 'right'],
-  );
-  assert.ok(plan.lines[0].x < plan.lines[1].x);
-});
-
-test('keeps the right column anchored instead of drifting into the center', () => {
-  const plan = createDualFlowPlan({
-    leftPrepared: {
-      startCursor: 0,
-      nextLine(startCursor, regionWidth) {
-        if (startCursor >= 1) {
-          return null;
-        }
-
-        return {
-          text: `left-${startCursor}`,
-          width: Math.min(regionWidth - 10, 180),
-          end: startCursor + 1,
-        };
-      },
-    },
-    rightPrepared: {
-      startCursor: 0,
-      nextLine(startCursor, regionWidth) {
-        if (startCursor >= 2) {
-          return null;
-        }
-
-        return {
-          text: `right-${startCursor}`,
-          width: Math.min(regionWidth - 10, 180),
-          end: startCursor + 1,
-        };
-      },
-    },
-    articleLeft: 40,
-    articleTop: 120,
-    articleWidth: 900,
-    articleHeight: 220,
-    lineHeight: 28,
-    columnGap: 52,
     stageTop: 120,
     stageHeight: 220,
     stageCenterX: 420,
@@ -316,6 +248,9 @@ test('keeps the right column anchored instead of drifting into the center', () =
     profileInset: 0.04,
   });
 
-  const rightLines = plan.lines.filter(line => line.column === 'right');
-  assert.ok(rightLines.every(line => line.x >= 516));
+  assert.deepEqual(
+    plan.lines.map(line => line.text),
+    ['line-0', 'line-1', 'line-2', 'line-3'],
+  );
+  assert.ok(plan.lines.every(line => line.column === undefined));
 });

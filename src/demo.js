@@ -1,5 +1,5 @@
-import { DROP_CAP, LEFT_COLUMN_TEXT, RIGHT_COLUMN_TEXT } from './sampleText.js';
-import { createBrowserPreparedText, createDualFlowPlan } from './layout.js';
+import { DROP_CAP, ARTICLE_TEXT } from './sampleText.js';
+import { createBrowserPreparedText, createFlowPlan } from './layout.js';
 import { DEFAULT_PROFILE } from './profile.js';
 import {
   computeForegroundPlacement,
@@ -17,7 +17,6 @@ const DEFAULT_VIDEO_ASPECT = 0.62;
 const TEXT_FONT_SIZE = 19;
 const TEXT_LINE_HEIGHT = 31;
 const TEXT_FONT = `${TEXT_FONT_SIZE}px "Iowan Old Style", "Palatino Linotype", "Noto Serif SC", serif`;
-const COLUMN_GAP = 52;
 const WRAP_GUTTER = 9;
 const WRAP_MIN_REGION_WIDTH = 240;
 const WRAP_OFFSET_DAMPING = 0.58;
@@ -37,10 +36,6 @@ export const DEMO_WRAP_DEFAULTS = {
   profileInset: WRAP_PROFILE_INSET,
 };
 
-export function getLineTextAlign(column) {
-  return column === 'left' ? 'right' : 'left';
-}
-
 const JUSTIFY_MIN_WORDS = 4;
 const JUSTIFY_MIN_FILL_RATIO = 0.72;
 const JUSTIFY_SKIP_ENDING_RE = /[.!?…:;]$/;
@@ -54,7 +49,7 @@ export function getLinePresentation(line) {
     !JUSTIFY_SKIP_ENDING_RE.test(line.text);
 
   return {
-    align: getLineTextAlign(line.column),
+    align: 'left',
     justify,
     words,
   };
@@ -394,17 +389,12 @@ function drawProcessedStage(elements, metrics, matte, state) {
 }
 
 async function ensurePreparedText(cache, context) {
-  if (cache.leftPrepared !== null && cache.rightPrepared !== null) {
+  if (cache.prepared !== null) {
     return cache;
   }
 
-  cache.leftPrepared = await createBrowserPreparedText({
-    text: LEFT_COLUMN_TEXT,
-    font: TEXT_FONT,
-    context,
-  });
-  cache.rightPrepared = await createBrowserPreparedText({
-    text: RIGHT_COLUMN_TEXT,
+  cache.prepared = await createBrowserPreparedText({
+    text: ARTICLE_TEXT,
     font: TEXT_FONT,
     context,
   });
@@ -415,22 +405,20 @@ async function render(root, elements, state, cache, context, matte) {
   const metrics = getPageMetrics(elements.paper, state, elements.video);
   const prepared = await ensurePreparedText(cache, context);
   state.engineLabel =
-    prepared.leftPrepared.engine === 'pretext'
+    prepared.prepared.engine === 'pretext'
       ? 'Layout engine: Pretext'
       : 'Layout engine: Canvas fallback';
 
   renderStage(elements, metrics, state);
   const profile = drawProcessedStage(elements, metrics, matte, state);
 
-  const plan = createDualFlowPlan({
-    leftPrepared: prepared.leftPrepared,
-    rightPrepared: prepared.rightPrepared,
+  const plan = createFlowPlan({
+    prepared: prepared.prepared,
     articleLeft: metrics.articleLeft,
     articleTop: metrics.articleTop,
     articleWidth: metrics.articleWidth,
     articleHeight: metrics.articleHeight,
     lineHeight: TEXT_LINE_HEIGHT,
-    columnGap: COLUMN_GAP,
     stageTop: metrics.stageTop,
     stageHeight: metrics.stageHeight,
     stageCenterX: metrics.stageCenterX,
@@ -466,7 +454,7 @@ export async function mountDemo(root) {
 
   const elements = getElements(root);
   const state = createInitialState();
-  const cache = { leftPrepared: null, rightPrepared: null };
+  const cache = { prepared: null };
   const context = createTextCanvasContext();
   const matte = createMatteContexts();
   let renderPromise = Promise.resolve();

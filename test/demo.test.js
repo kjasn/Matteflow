@@ -4,7 +4,6 @@ import {
   buildAppHtml,
   DEMO_WRAP_DEFAULTS,
   getLinePresentation,
-  getLineTextAlign,
   syncReferenceVideo,
 } from '../src/demo.js';
 
@@ -36,21 +35,23 @@ test('uses moderate wrap defaults instead of overly tight spacing', () => {
   assert.equal(DEMO_WRAP_DEFAULTS.follow, 0.58);
 });
 
-test('aligns dual columns toward the center seam', () => {
-  assert.equal(getLineTextAlign('left'), 'right');
-  assert.equal(getLineTextAlign('right'), 'left');
-  assert.equal(getLineTextAlign(undefined), 'left');
+test('uses left alignment for single-column flowing text', () => {
+  const line = getLinePresentation({
+    text: 'A single stream of text bends around a subject silhouette',
+    width: 280,
+    regionWidth: 340,
+  });
+
+  assert.equal(line.align, 'left');
 });
 
 test('prefers justification for well-filled editorial lines', () => {
   const justified = getLinePresentation({
-    column: 'right',
     text: 'A convincing spread needs two calm reading rivers',
     width: 280,
     regionWidth: 340,
   });
   const ragged = getLinePresentation({
-    column: 'left',
     text: 'And then it rests.',
     width: 128,
     regionWidth: 340,

@@ -96,6 +96,8 @@ input {
 .paper-frame {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  gap: 26px;
 }
 
 .paper {
@@ -174,11 +176,8 @@ input {
 }
 
 .reference-panel {
-  position: absolute;
-  left: 50%;
-  bottom: 34px;
-  transform: translateX(-50%);
-  width: min(420px, calc(100% - 180px));
+  position: relative;
+  width: 320px;
   padding: 12px 14px 14px;
   border-radius: 22px;
   background: linear-gradient(180deg, rgba(247, 244, 238, 0.96), rgba(238, 234, 227, 0.92));

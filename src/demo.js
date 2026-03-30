@@ -14,6 +14,8 @@ const PAGE_MIN_HEIGHT = 780;
 const PAGE_PADDING = 82;
 const ARTICLE_TOP = 74;
 const DEFAULT_VIDEO_ASPECT = 0.62;
+const REFERENCE_PANEL_WIDTH = 320;
+const REFERENCE_PANEL_GAP = 26;
 const TEXT_FONT_SIZE = 19;
 const TEXT_LINE_HEIGHT = 31;
 const TEXT_FONT = `${TEXT_FONT_SIZE}px "Iowan Old Style", "Palatino Linotype", "Noto Serif SC", serif`;
@@ -25,7 +27,6 @@ const MATTE_THRESHOLD = 34;
 const MATTE_FEATHER = 28;
 const MATTE_MIN_ALPHA = 22;
 const RENDER_FPS = 12;
-const REFERENCE_RESERVE_SPACE = 272;
 
 export const DEMO_WRAP_DEFAULTS = {
   distance: WRAP_GUTTER,
@@ -129,29 +130,29 @@ export function buildAppHtml() {
       </div>
 
         <main class="paper-frame">
-            <section class="paper" data-role="paper">
-              <div class="drop-cap" data-role="drop-cap">${DROP_CAP}</div>
-              <div class="text-layer" data-role="text-layer"></div>
-              <div class="video-stage" data-role="video-stage">
+          <section class="paper" data-role="paper">
+            <div class="drop-cap" data-role="drop-cap">${DROP_CAP}</div>
+            <div class="text-layer" data-role="text-layer"></div>
+            <div class="video-stage" data-role="video-stage">
               <canvas data-role="stage-canvas"></canvas>
               <video data-role="video" playsinline loop preload="metadata"></video>
-              </div>
-              <section class="reference-panel" data-role="reference-panel" hidden>
-                <div class="reference-panel__header">
-                  <span class="reference-panel__eyebrow">Reference</span>
-                  <span class="reference-panel__title">Original video</span>
-                </div>
-                <video
-                  class="reference-panel__video"
-                  data-role="reference-video"
-                  playsinline
-                  loop
-                  preload="metadata"
-                  muted
-                ></video>
-              </section>
-            </section>
-          </main>
+            </div>
+          </section>
+          <section class="reference-panel" data-role="reference-panel" hidden>
+            <div class="reference-panel__header">
+              <span class="reference-panel__eyebrow">Reference</span>
+              <span class="reference-panel__title">Original video</span>
+            </div>
+            <video
+              class="reference-panel__video"
+              data-role="reference-video"
+              playsinline
+              loop
+              preload="metadata"
+              muted
+            ></video>
+          </section>
+        </main>
     </div>
   `;
 }
@@ -195,12 +196,13 @@ function createTextCanvasContext() {
 function getPageMetrics(paper, state, video) {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  const pageWidth = Math.min(PAGE_MAX_WIDTH, viewportWidth - 48);
+  const maxPaperWidth = viewportWidth - 48 - REFERENCE_PANEL_WIDTH - REFERENCE_PANEL_GAP;
+  const pageWidth = Math.min(PAGE_MAX_WIDTH, Math.max(700, maxPaperWidth));
   const pageHeight = Math.max(PAGE_MIN_HEIGHT, viewportHeight - 140);
   const articleLeft = PAGE_PADDING;
   const articleWidth = pageWidth - PAGE_PADDING * 2;
   const articleTop = ARTICLE_TOP;
-  const articleBottomPadding = state.objectUrl === null ? 60 : REFERENCE_RESERVE_SPACE;
+  const articleBottomPadding = 60;
   const articleHeight = pageHeight - ARTICLE_TOP - articleBottomPadding;
   const videoAspect =
     video.videoWidth > 0 && video.videoHeight > 0

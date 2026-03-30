@@ -23,7 +23,7 @@ test('renders controls for local video input and wrap tuning', () => {
   assert.match(html, /data-role="reference-video"/i);
   assert.match(
     html,
-    /<section class="paper"[\s\S]*data-role="reference-panel"[\s\S]*data-role="reference-video"[\s\S]*<\/section>/i,
+    /<main class="paper-frame">[\s\S]*<section class="paper"[\s\S]*<\/section>[\s\S]*<section class="reference-panel"[\s\S]*data-role="reference-video"[\s\S]*<\/section>[\s\S]*<\/main>/i,
   );
   assert.doesNotMatch(html, /video-placeholder/i);
   assert.doesNotMatch(html, /Choose a local portrait-style video/i);
